@@ -28,25 +28,40 @@ const bookGenres = books.map((book) => book.genre);
   return result;
 }
 
+
 function getMostPopularBooks(books) {
-  const borrows = books.map(book=>({name:book.title, count:book.borrows.length}));
+  const borrows = hlprFuncBookBurrowMapper(books)
     borrows.sort((a,b) => b.count - a.count);
     return borrows.slice(0,5);
 }
 
-function getMostPopularAuthors(books, authors) {
-const popularAuthors = authors.map(author => ({
-...author,
-bookCount: books.filter(book => book.authorId === author.id).length,
-borrowCount: books.filter(book => book.authorId === author.id).reduce((acc, cur) => acc + cur.borrows.length, 0)
-})).sort((book, author) => author.borrowCount - book.borrowCount);
-popularAuthors.length = 5;
-return popularAuthors.map(result => {
-return {count: result.borrowCount, name: result.name.first + " " + result.name.last};
-})
+function hlprFuncBookBurrowMapper(books) {
+   return books.map(book=>({name:book.title, count:book.borrows.length}));
 }
 
+function getMostPopularAuthors(books, authors) {
+    const popularAuthors = hlprFuncMapPopularAuthors(books, authors);
+    const popularAuthorsFive = hlprFuncToLimitArrayToFive(popularAuthors);
+     return popularAuthorsFive.map(result => {
+       return {count: result.borrowCount,
+               name: result.name.first + " " + result.name.last};
+    })
+}
 
+//-------- helper function supporting the test to limit upto 5 -----------
+function hlprFuncToLimitArrayToFive(arr){
+  arr.length=5;
+  return arr;
+}
+
+function hlprFuncMapPopularAuthors(books, authors) {
+    return authors.map(author => ({
+      ...author,
+      bookCount: books.filter(book => book.authorId === author.id).length,
+      borrowCount: books.filter(book => book.authorId === author.id)
+      .reduce((acc, cur) => acc + cur.borrows.length, 0)
+    })).sort((book, author) => author.borrowCount - book.borrowCount);
+}
 
 module.exports = {
   getTotalBooksCount,
